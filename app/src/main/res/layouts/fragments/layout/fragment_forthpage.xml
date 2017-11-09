@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorAppBg"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_title"
+        style="@style/title"
+        android:text="第四界面" />
+
+    <com.sunfusheng.marqueeview.MarqueeView
+        android:id="@+id/vertical_MarqueeView"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        app:mvAnimDuration="1000"
+        app:mvDirection="bottom_to_top"
+        app:mvInterval="3000"
+        app:mvSingleLine="true"
+        app:mvTextColor="@color/colorTheme"
+        app:mvTextSize="14sp" />
+
+    <com.sunfusheng.marqueeview.MarqueeView
+        android:id="@+id/horizontal_MarqueeView"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        app:mvAnimDuration="1000"
+        app:mvDirection="bottom_to_top"
+        app:mvInterval="3000"
+        app:mvSingleLine="true"
+        app:mvTextColor="@color/colorTheme"
+        app:mvTextSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="bottom"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/button_forthpage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:text="RxBus" />
+
+        <Button
+            android:id="@+id/button_forthpage01"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginTop="8dp"
+            android:text="WebView" />
+
+        <Button
+            android:id="@+id/button_forthpage02"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="25dp"
+            android:layout_marginRight="25dp"
+            android:layout_marginTop="8dp"
+            android:text="QR_Code" />
+    </LinearLayout>
+
+</LinearLayout>

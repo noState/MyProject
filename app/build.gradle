@@ -1,0 +1,268 @@
+apply plugin: 'com.android.application'
+// ButterKnife
+apply plugin: 'com.jakewharton.butterknife'
+// Bugtags
+//apply plugin: 'com.bugtags.library.plugin'
+// Dex方法树分包
+apply plugin: 'dexknifePlus'
+// Lambda AndroidStudio3.0注意后支持Java8
+//apply plugin: 'me.tatarka.retrolambda'
+
+// 程序编译时间
+def releaseTime() {
+    return new Date().format("yyyyMMdd", TimeZone.getTimeZone("UTC"))
+}
+
+android {
+
+    compileSdkVersion rootProject.ext.android["compileSdkVersion"]
+    buildToolsVersion rootProject.ext.android["buildToolsVersion"]
+
+    useLibrary 'org.apache.http.legacy'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId "com.liuwen.myproject"
+        // 程序版本控制
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        flavorDimensions String.valueOf(rootProject.ext.android["flavorDimensions"])
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        // 友盟默认渠道名指向
+        manifestPlaceholders = [UMENG_CHANNEL_VALUE: "umeng"]
+        // 方法树超标
+        multiDexEnabled true
+        // 支持设备的SO库构架
+        ndk {
+            abiFilters 'armeabi',
+                    'armeabi-v7a',
+                    'arm64-v8a',
+                    'x86',
+                    'x86_64',
+                    'mips',
+                    'mips64'
+        }
+        // 面向China发布 (瘦身)
+        resConfigs "zh"
+    }
+
+    // 签名文件
+    signingConfigs {
+        debug {
+            keyAlias DEBUG_KEYALIAS
+            keyPassword DEBUG_KEYPASSWORD
+            storeFile file(DEBUG_STOREFILE)
+            storePassword DEBUG_STOREPASSWORD
+        }
+        release {
+            keyAlias RELASE_KEYALIAS
+            keyPassword RELASE_KEYPASSWORD
+            storeFile file(RELASE_STOREFILE)
+            storePassword RELASE_STOREPASSWORD
+        }
+    }
+
+    // 分包
+    dexKnife {
+        // 必选参数
+        enabled true //if false,禁用分包插件
+        // 可选参数
+        // 1.如果没有可选参数，将根据enabled决定是否分包。
+        // 2.如果有可选参数，需满足必选参数和可选参数的条件才允许分包
+        productFlavor 'mock'
+        buildType 'debug'
+        /*
+        * eg:当前productFlavors = dev，buildType = debug，
+        * 参数组合1：enabled = true，productFlavor = dev，buildType = debug 分包
+        * 参数组合2：enabled = true，productFlavor = mock，buildType = debug 不分包
+        * 参数组合1：enabled = true，buildType = debug 所有buildType = debug分包
+        * 参数组合1：enabled = true，productFlavor = dev 所有productFlavor = dev分包
+        * */
+    }
+
+    dexOptions {
+        preDexLibraries = false
+        // 分配堆内存大小
+        javaMaxHeapSize "4g"
+    }
+
+    lintOptions {
+        disable "ResourceType"
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "boolean", "LOG_DEBUG", "true"
+            minifyEnabled true
+            zipAlignEnabled true
+            shrinkResources true
+            versionNameSuffix '-debug'
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+        release {
+            // 禁Log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+            // 混淆
+            minifyEnabled true
+            // apk压缩包(对齐)优化(减少Apk启动的内存消耗)开启
+            zipAlignEnabled true
+            // 移除无用源文件 (瘦身)依赖于minifyEnabled true
+            shrinkResources true
+            // 版本名后缀
+            versionNameSuffix '-release'
+            // 混淆文件路径
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // 配置签名
+            signingConfig signingConfigs.release
+        }
+        staging {
+            // Specifies a sorted list of fallback build types that the
+            // plugin should try to use when a dependency does not include a
+            // "staging" build type. You may specify as many fallbacks as you
+            // like, and the plugin selects the first build type that's
+            // available in the dependency.
+            matchingFallbacks = ['debug', 'myproject', 'release']
+        }
+    }
+
+    // 打包时忽略三方的相同文件(瘦身)
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+    }
+
+    // 创建source目录
+    sourceSets {
+        main {
+            res.srcDirs =
+                    [
+                            'src/main/res/layouts/activities',
+                            'src/main/res/layouts/fragments',
+                            'src/main/res/layouts/recycleviews',
+                            'src/main/res/layouts/content',
+                            'src/main/res/layouts',
+                            'src/main/res'
+                    ]
+        }
+        instrumentTest.setRoot('tests')
+        debug.setRoot('build-types/debug')
+        release.setRoot('build-types/release')
+    }
+
+    // Gradle多渠道打包
+    productFlavors {
+        app_myproject {}
+        tencent {}
+        wandoujia {}
+        c360 {}
+        baidu {}
+        huawei {}
+        xiaomi {}
+        oppo {}
+        vivo {}
+        lenovo {}
+        sougou {}
+        leshi {}
+        samsung {}
+        productFlavors.all { flavor ->
+            flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name]
+        }
+    }
+
+    // Apk包名养成
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            if (variant.buildType.name == "release") {
+                outputFileName = "${variant.productFlavors[0].name}_${defaultConfig.versionName}_${releaseTime()}_release.apk"
+            } else {
+                outputFileName = "myproject_${defaultConfig.versionName}_${releaseTime()}_debug.apk"
+            }
+        }
+    }
+}
+
+// BugTags配置
+//bugtags {
+//    // 自动上传符号表功能配置，如果需要根据 build varint 配置，请参考帮助中心->符号表->Android 符号表->配置自动上传符号表
+//    appKey "31659bb7592a98f80557330025218c54"
+//    // 这里是你的 appKey
+//    appSecret "75d299bde239846418465eaa6e69a967"
+//    // 这里是你的 appSecret，管理员在设置页可以查看
+//    mappingUploadEnabled true
+//    // 网络跟踪功能配置(企业版)
+//    trackingNetworkEnabled true
+//}
+
+// 程序依赖
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation rootProject.ext.dependencies["appcompat-v7"]
+    implementation rootProject.ext.dependencies["support-annotations"]
+    implementation rootProject.ext.dependencies["support-v4"]
+    testCompile rootProject.ext.dependencies["junit"]
+
+    //=================================================================================Self_Dependencies==============================================================================
+
+    // Design
+    implementation rootProject.ext.dependencies["design"]
+    // LeakCanary
+    debugCompile rootProject.ext.dependencies["leakcanary-android"]
+    releaseCompile rootProject.ext.dependencies["leakcanary-android-no-op"]
+    testCompile rootProject.ext.dependencies["leakcanary-android-no-op"]
+    // MultiDex
+    implementation rootProject.ext.dependencies["multidex"]
+    // Logger
+    implementation rootProject.ext.dependencies["logger"]
+    // ButterKnife
+    implementation rootProject.ext.dependencies["butterknife"]
+    annotationProcessor rootProject.ext.dependencies["butterknife-compiler"]
+    // MarqueeView
+    implementation rootProject.ext.dependencies["marqueeview"]
+    // RxPermissions
+    implementation rootProject.ext.dependencies["rxpermissions"]
+    // 底部控制栏
+    implementation rootProject.ext.dependencies["bottom-navigation-bar"]
+    // Retrofit+OkHttp+Rxjava+RxAndroid+Gson+RxBus网络访问框架
+    implementation rootProject.ext.dependencies["retrofit"]
+    implementation rootProject.ext.dependencies["okhttp"]
+    implementation rootProject.ext.dependencies["okhttp-logging-interceptor"]
+    implementation rootProject.ext.dependencies["retrofit-converter-gson"]
+    implementation rootProject.ext.dependencies["retrofit-adapter-rxjava"]
+    implementation rootProject.ext.dependencies["rxbinding"]
+    implementation rootProject.ext.dependencies["gson"]
+    implementation rootProject.ext.dependencies["rxandroid"]
+    // 图片处理
+    implementation rootProject.ext.dependencies["glide"]
+    // 轮播图
+    implementation rootProject.ext.dependencies["banner"]
+    // RecyclerView
+    implementation rootProject.ext.dependencies["easyrecyclerview"]
+    // CardView
+    implementation rootProject.ext.dependencies["cardview-v7"]
+    // 萌萌哒Toast
+    implementation rootProject.ext.dependencies["tastytoast"]
+    // BugTags
+//    compile 'com.bugtags.library:bugtags-lib:latest.integration'
+    // 友盟
+    implementation project(':PushSDK')
+    implementation rootProject.ext.dependencies["uemng-analytics"]
+    // 二维码
+    implementation files('libs/zxing.jar')
+    // 腾讯X5内核 WebView
+    implementation files('libs/tbs_sdk_thirdapp_v3.3.0.1045_43300_sharewithdownload_withoutGame_obfs_20170605_170212.jar')
+}

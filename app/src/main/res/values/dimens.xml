@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="toolbar_height">44dp</dimen>
+    <dimen name="textSize_12sp">12sp</dimen>
+    <dimen name="textSize_14sp">14sp</dimen>
+    <dimen name="textSize_16sp">16sp</dimen>
+    <dimen name="textSize_18sp">18sp</dimen>
+    <dimen name="textSize_20sp">20sp</dimen>
+    <dimen name="back_paddingleft">15dp</dimen>
+    <dimen name="back_paddingright">5dp</dimen>
+
+
+    <!--BottomNavigationBar-->
+    <dimen name="fixed_label_active">12sp</dimen>
+    <dimen name="fixed_label_inactive">11sp</dimen>
+    <dimen name="bottom_navigation_height">49dp</dimen>
+    <dimen name="fixed_height_top_padding_inactive">2dp</dimen>
+    <dimen name="fixed_height_top_padding_active">1dp</dimen>
+    <dimen name="more_page_item_left_right_padding">16dp</dimen>
+</resources>
